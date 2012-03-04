@@ -1,1 +1,4 @@
 
+[submodule "dhdatadownloader/Frameworks/ParsePy"]
+	path = dhdatadownloader/Frameworks/ParsePy
+	url = git@github.com:timgshi/ParsePy.git
