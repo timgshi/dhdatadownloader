@@ -5,6 +5,7 @@ from django.conf.urls.defaults import patterns, include, url
 # admin.autodiscover()
 
 urlpatterns = patterns('',
+	url(r'^$', 'dhdatadownloader.main.views.index')
     # Examples:
     # url(r'^$', 'dhdatadownloader.views.home', name='home'),
     # url(r'^dhdatadownloader/', include('dhdatadownloader.foo.urls')),

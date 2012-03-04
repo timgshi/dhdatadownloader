@@ -1,0 +1,3 @@
+[submodule "dhdatadownloader/Frameworks/ParsePy"]
+	path = dhdatadownloader/Frameworks/ParsePy
+	url = https://github.com/pktck/ParsePy.git
