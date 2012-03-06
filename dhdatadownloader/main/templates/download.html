@@ -1,0 +1,18 @@
+{% extends "templates/base.html" %}
+
+
+{% block content %}
+
+
+
+<form action="download" method="post">
+{% csrf_token %}
+
+{{form.as_p}}
+<label for="id_startdate">Start Date (mm/dd/yy)</label>
+<input type="submit" value="Vote" />
+</form> 
+
+
+<p><a href="downloadFile">Click here to download</a></p>
+{% endblock %}

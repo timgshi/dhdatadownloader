@@ -1,14 +1,22 @@
 from django.http import HttpResponse
-from django.template import Context, loader
+from django.template import Context, loader, RequestContext
+from django import forms
 import csv
 import datetime
 from Frameworks import ParsePy
 import xlwt
 
+now = datetime.datetime.now()
+
+class QueryForm(forms.Form):
+    limit = forms.IntegerField()
+    startdate = forms.DateField(now, '%m/%d/%y')
+    enddate = forms.DateField(now, '%m/%d/%y')
+
 ParsePy.APPLICATION_ID = "53Rdo20D9PA1hiPTN7qPzcPVaNQEmAkMXi3j6tLv"
 ParsePy.MASTER_KEY = "FqhBINgpfI1ISF1ao2poRHYzvhbbr6PjJvuij0cq"
 
-now = datetime.datetime.now()
+
 
 def index(request):
     x = 'hi'
@@ -19,6 +27,19 @@ def index(request):
     return HttpResponse(t.render(c))
 
 def download(request):
+    if request.method == 'POST':
+        form = QueryForm(request.POST)
+        if form.is_valid():
+            return downloadFile(request)
+    else: 
+        form = QueryForm()
+        t = loader.get_template('templates/download.html')
+        c = RequestContext(request, {
+            'form' : form,
+        })
+        return HttpResponse(t.render(c))
+
+def downloadFile(request):
 
     response = HttpResponse(mimetype='text/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=dhdata-%s.xls' % now.strftime('%d-%m-%y')
@@ -37,7 +58,7 @@ def download(request):
     h_style.font = f
     
     query = ParsePy.ParseQuery("DHPhoto")
-    query.order("updatedAt", True).limit(4)
+    query.order("updatedAt", True).limit(10)
     objects = query.fetch();
     headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL']
     for x in range((len(headers))):
