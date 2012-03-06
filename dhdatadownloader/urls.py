@@ -6,7 +6,8 @@ from django.conf.urls.defaults import patterns, include, url
 
 urlpatterns = patterns('',
 	url(r'^$', 'dhdatadownloader.main.views.index'),
-	url(r'^download/$', 'dhdatadownloader.main.views.download')
+	url(r'^download/$', 'dhdatadownloader.main.views.download'),
+	url(r'^download/downloadFile/$', 'dhdatadownloader.main.views.downloadFile')
     # Examples:
     # url(r'^$', 'dhdatadownloader.views.home', name='home'),
     # url(r'^dhdatadownloader/', include('dhdatadownloader.foo.urls')),
