@@ -1,2 +1,7 @@
-<h1>Hello, world!</h1>
-<p>{{x}}</p>
+{% extends "templates/base.html" %}
+
+
+{% block content %}
+<h1>Hello, welcome to the DH Data downloader!</h1>
+<p><a href="download/downloadFile">Click here to download</a></p>
+{% endblock %}
