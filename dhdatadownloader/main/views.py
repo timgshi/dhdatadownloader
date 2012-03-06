@@ -23,8 +23,8 @@ def download(request):
     query.order("updatedAt").limit(2)
     objects = query.fetch();
 
-    writer.writerow(['', 'description', 'username'])
+    writer.writerow(['', 'description', 'username', 'url'])
     for x in objects:
-        writer.writerow(['', x.DHDataSixWord, x.DHDataWhoTook])
+        writer.writerow(['', x.DHDataSixWord, x.DHDataWhoTook, x.photoData.url])
 
     return response
