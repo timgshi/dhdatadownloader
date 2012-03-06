@@ -5,6 +5,7 @@ import csv
 import datetime
 from Frameworks import ParsePy
 import xlwt
+from bootstrap.forms import BootstrapForm, Fieldset
 
 now = datetime.datetime.now()
 
@@ -12,6 +13,15 @@ class QueryForm(forms.Form):
     limit = forms.IntegerField()
     startdate = forms.DateField(now, '%m/%d/%y')
     enddate = forms.DateField(now, '%m/%d/%y')
+
+class LoginForm(BootstrapForm):
+    class Meta:
+        layout = (
+            Fieldset("Please Login", "username", "password", ),
+        )
+
+    # username = forms.CharField(max_length=100)
+    password = forms.CharField(widget=forms.PasswordInput(), max_length=100)
 
 ParsePy.APPLICATION_ID = "53Rdo20D9PA1hiPTN7qPzcPVaNQEmAkMXi3j6tLv"
 ParsePy.MASTER_KEY = "FqhBINgpfI1ISF1ao2poRHYzvhbbr6PjJvuij0cq"
@@ -32,10 +42,11 @@ def download(request):
         if form.is_valid():
             return downloadFile(request)
     else: 
-        form = QueryForm()
+        bform = LoginForm()
+        print bform
         t = loader.get_template('templates/download.html')
         c = RequestContext(request, {
-            'form' : form,
+            'form' : bform,
         })
         return HttpResponse(t.render(c))
 
