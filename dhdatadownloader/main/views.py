@@ -1,6 +1,7 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import Context, loader, RequestContext
-from django import forms
+from django.contrib import sessions
+from django import forms, shortcuts
 import csv
 import datetime
 from Frameworks import ParsePy
@@ -17,11 +18,11 @@ class QueryForm(forms.Form):
 class LoginForm(BootstrapForm):
     class Meta:
         layout = (
-            Fieldset("Please Login", "username", "password", ),
+            Fieldset("Please Login", "username", "username", "password"),
         )
-
-    # username = forms.CharField(max_length=100)
     password = forms.CharField(widget=forms.PasswordInput(), max_length=100)
+    username = forms.CharField(max_length=100)
+    
 
 ParsePy.APPLICATION_ID = "53Rdo20D9PA1hiPTN7qPzcPVaNQEmAkMXi3j6tLv"
 ParsePy.MASTER_KEY = "FqhBINgpfI1ISF1ao2poRHYzvhbbr6PjJvuij0cq"
@@ -29,10 +30,14 @@ ParsePy.MASTER_KEY = "FqhBINgpfI1ISF1ao2poRHYzvhbbr6PjJvuij0cq"
 
 
 def index(request):
+    loggedIn = False
+    if 'session_id' in request.session:
+        loggedIn = True
     x = 'hi'
     t = loader.get_template('templates/index.html')
     c = Context({
-        'x' : x
+        'x' : x,
+        'loggedIn' : loggedIn
     })
     return HttpResponse(t.render(c))
 
@@ -49,6 +54,30 @@ def download(request):
             'form' : bform,
         })
         return HttpResponse(t.render(c))
+
+def login(request):
+    if 'session_id' in request.session:
+        print "Logged In"
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        print request.POST['username']
+        print request.POST['password']
+        request.session['session_id'] = request.POST['username']
+        print request.session['session_id']
+        return HttpResponseRedirect('/')
+    t = loader.get_template('templates/login.html')
+    bform = LoginForm()
+    c = RequestContext(request, {
+        'form' : bform,
+    })
+    return HttpResponse(t.render(c))
+
+def logout(request):
+    try:
+        del request.session['session_id']
+    except KeyError:
+        pass
+    return HttpResponseRedirect('/')
 
 def downloadFile(request):
 
