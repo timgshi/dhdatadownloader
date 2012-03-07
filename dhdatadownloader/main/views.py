@@ -56,19 +56,31 @@ def download(request):
         return HttpResponse(t.render(c))
 
 def login(request):
+    login_failed = False
     if 'session_id' in request.session:
         print "Logged In"
     if request.method == 'POST':
         form = LoginForm(request.POST)
-        print request.POST['username']
-        print request.POST['password']
-        request.session['session_id'] = request.POST['username']
-        print request.session['session_id']
-        return HttpResponseRedirect('/')
+        username =request.POST['username']
+        password = request.POST['password']
+
+        user = ParsePy.ParseUser()
+        user.login(username, password)
+
+        if user.session_token:
+            print user.session_token
+
+            request.session['session_id'] = user.session_token
+            return HttpResponseRedirect('/')
+        else:
+            login_failed = True
+            print "LOGIN FAILED"
+
     t = loader.get_template('templates/login.html')
     bform = LoginForm()
     c = RequestContext(request, {
         'form' : bform,
+        'login_failed' : login_failed
     })
     return HttpResponse(t.render(c))
 
