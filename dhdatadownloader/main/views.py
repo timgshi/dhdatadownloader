@@ -1,10 +1,12 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import Context, loader, RequestContext
-from django import forms
+from django.contrib import sessions
+from django import forms, shortcuts
 import csv
 import datetime
 from Frameworks import ParsePy
 import xlwt
+from bootstrap.forms import BootstrapForm, Fieldset
 
 now = datetime.datetime.now()
 
@@ -13,16 +15,29 @@ class QueryForm(forms.Form):
     startdate = forms.DateField(now, '%m/%d/%y')
     enddate = forms.DateField(now, '%m/%d/%y')
 
+class LoginForm(BootstrapForm):
+    class Meta:
+        layout = (
+            Fieldset("Please Login", "username", "username", "password"),
+        )
+    password = forms.CharField(widget=forms.PasswordInput(), max_length=100)
+    username = forms.CharField(max_length=100)
+    
+
 ParsePy.APPLICATION_ID = "53Rdo20D9PA1hiPTN7qPzcPVaNQEmAkMXi3j6tLv"
 ParsePy.MASTER_KEY = "FqhBINgpfI1ISF1ao2poRHYzvhbbr6PjJvuij0cq"
 
 
 
 def index(request):
+    loggedIn = False
+    if 'session_id' in request.session:
+        loggedIn = True
     x = 'hi'
     t = loader.get_template('templates/index.html')
     c = Context({
-        'x' : x
+        'x' : x,
+        'loggedIn' : loggedIn
     })
     return HttpResponse(t.render(c))
 
@@ -32,12 +47,49 @@ def download(request):
         if form.is_valid():
             return downloadFile(request)
     else: 
-        form = QueryForm()
+        bform = LoginForm()
+        print bform
         t = loader.get_template('templates/download.html')
         c = RequestContext(request, {
-            'form' : form,
+            'form' : bform,
         })
         return HttpResponse(t.render(c))
+
+def login(request):
+    login_failed = False
+    if 'session_id' in request.session:
+        print "Logged In"
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        username =request.POST['username']
+        password = request.POST['password']
+
+        user = ParsePy.ParseUser()
+        user.login(username, password)
+
+        if user.session_token:
+            print user.session_token
+
+            request.session['session_id'] = user.session_token
+            return HttpResponseRedirect('/')
+        else:
+            login_failed = True
+            print "LOGIN FAILED"
+
+    t = loader.get_template('templates/login.html')
+    bform = LoginForm()
+    c = RequestContext(request, {
+        'form' : bform,
+        'login_failed' : login_failed
+    })
+    return HttpResponse(t.render(c))
+
+def logout(request):
+    try:
+        del request.session['session_id']
+    except KeyError:
+        pass
+    return HttpResponseRedirect('/')
 
 def downloadFile(request):
 
