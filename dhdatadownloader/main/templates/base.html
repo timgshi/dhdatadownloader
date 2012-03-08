@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="">
-    <meta name="author" content="Tim Shi">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="">
+  <meta name="author" content="Tim Shi">
+
+  <!-- Facebook Open Graph Tags -->
+  <meta property="og:title" content="DH Data Downloader" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="http://dhdatadownloader.herokuapp.com" />
+  <meta property="og:image" content="http://imgur.com/rG1Or" />
+  <meta property="og:site_name" content="DH Data Downloader" />
+  <meta property="fb:admins" content="1063320196" />
   <!-- <link rel="stylesheet" href="style.css" /> -->
   <title>{% block title %}Designing Happiness Data Download{% endblock %}</title>
   {% load bootstrap %}
@@ -20,6 +28,7 @@
 
 <body>
 
+
   <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container">
@@ -34,16 +43,38 @@
             <li class="active"><a href="#">Home</a></li>
             <li><a href="http://www.stanford.edu/class/mktg355/">MKTG 355</a></li>
             {%block navbar %}{% endblock %}
-            </ul>
+          </ul>
         </div><!--/.nav-collapse -->
       </div>
     </div>
   </div>
 
- 
+
 
 
   {%block content %}{% endblock %}
+
+  <!-- Facebook -->
+  <div id="fb-root"></div>
+  <script>
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId      : '171752956231417',
+      status     : true, 
+      cookie     : true,
+      xfbml      : true,
+      oauth      : true,
+    });
+    {% block fbinit %}{% endblock %}
+  };
+
+  (function(d){
+   var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
+   js = d.createElement('script'); js.id = id; js.async = true;
+   js.src = "//connect.facebook.net/en_US/all.js";
+   d.getElementsByTagName('head')[0].appendChild(js);
+ }(document));
+  </script>
 
   <!-- Google Analytics -->
   <script type="text/javascript">
@@ -60,25 +91,7 @@
 
   </script>
 
-  <!-- Facebook -->
-  <div id="fb-root"></div>
-      <script>
-        window.fbAsyncInit = function() {
-          FB.init({
-            appId      : '171752956231417',
-            status     : true, 
-            cookie     : true,
-            xfbml      : true,
-            oauth      : true,
-          });
-        };
-        (function(d){
-           var js, id = 'facebook-jssdk'; if (d.getElementById(id)) {return;}
-           js = d.createElement('script'); js.id = id; js.async = true;
-           js.src = "//connect.facebook.net/en_US/all.js";
-           d.getElementsByTagName('head')[0].appendChild(js);
-         }(document));
-      </script>
+
 
 <!-- Le javascript
   ================================================== -->
