@@ -1,5 +1,10 @@
 {% extends "templates/base.html" %}
 
+{% block fbinit %}
+FB.Event.subscribe('auth.login', function(response) {
+  alert('logged in');
+});
+{% endblock %}
 
 {% block content %}
 
@@ -24,11 +29,14 @@
 						<button type="submit" class="btn btn-primary">Login</button>
 					</div>
 				</form>
+				<div class="fb-login-button"></div>
 			</div>
 		</div>
 	</div>
 </div>
 </div>
+
+
 
 
 {% endblock %}
