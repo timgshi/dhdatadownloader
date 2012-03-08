@@ -1,9 +1,23 @@
 {% extends "templates/base.html" %}
 
 {% block fbinit %}
-FB.Event.subscribe('auth.login', function(response) {
-  alert('logged in');
-});
+<!-- FB.Event.subscribe('auth.login', function(response) {
+	alert('logged in');
+		var myForm = document.createElement("form");
+		myForm.method="post" ;
+		myForm.action = "/" ;
+		p = {user:'peter',cc:'aus'};
+		for (var k in p) {
+			var myInput = document.createElement("input") ;
+			myInput.setAttribute("name", k) ;
+			myInput.setAttribute("value", p[k]);
+			myForm.appendChild(myInput) ;
+		}
+		document.body.appendChild(myForm) ;
+		myForm.submit() ;
+		document.body.removeChild(myForm) ;
+
+}); -->
 {% endblock %}
 
 {% block content %}
@@ -29,7 +43,7 @@ FB.Event.subscribe('auth.login', function(response) {
 						<button type="submit" class="btn btn-primary">Login</button>
 					</div>
 				</form>
-				<div class="fb-login-button"></div>
+				<!-- <div class="fb-login-button"></div> -->
 			</div>
 		</div>
 	</div>
