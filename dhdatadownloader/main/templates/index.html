@@ -1,5 +1,22 @@
 {% extends "templates/base.html" %}
 
+{%block head %}
+<script type="text/javascript">
+(function() {
+	var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+	po.src = 'https://apis.google.com/js/plusone.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+})();
+</script>
+<!-- Update your html tag to include the itemscope and itemtype attributes -->
+<html itemscope itemtype="http://schema.org/Product">
+
+<!-- Add the following three tags inside head -->
+<meta itemprop="name" content="DH Data Downloader">
+<meta itemprop="description" content="Download the DH App Data">
+<meta itemprop="image" content="http://i.imgur.com/rG1Or.png">
+{% endblock %}
+
 {% block navbar %}
 {% if loggedIn %}
 <li><a href="/logout">Logout</a></li>
@@ -24,7 +41,13 @@
 		<p><a class="btn btn-primary btn-large" href="/login">Log in &raquo;</a></p>
 		{% endif %}
 	</div>
-	<div class="fb-like" data-href="http://dhdatadownloader.herokuapp.com" data-send="true" data-width="450" data-show-faces="true"></div>
+	<div class="row">
+		<div class="g-plusone" data-size="medium" data-annotation="inline" data-href="http://dhdatadownloader.herokuapp.com"></div>
+	</div>
+	<div class="row">
+		<div class="fb-like" data-href="http://dhdatadownloader.herokuapp.com" data-send="true" data-width="450" data-show-faces="true"></div>
+	</div>
+
 </div>
 
 
