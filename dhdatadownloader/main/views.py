@@ -110,11 +110,10 @@ def downloadFile(request):
 
         h_style = xlwt.XFStyle()
         h_style.font = f
-        limit = request.GET.get('limit')
-        if limit==-1:
-            limit = 1000
-        elif limit > 1000 or limit < 0:
+        limit = int(request.GET.get('limit'))
+        if limit > 1000 or limit < 0:
             limit = 20
+        print limit
         query = ParsePy.ParseQuery("DHPhoto").limit(limit)
         query.order("updatedAt", True)
         objects = query.fetch();
