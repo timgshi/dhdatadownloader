@@ -34,9 +34,13 @@
 	<!-- Main hero unit for a primary marketing message or call to action -->
 	<div class="hero-unit">
 		<h1>Welcome to the DH Data Downloader!</h1>
-		<p>From here you'll be able to download an excel spreadsheet of the data collected from the DH app. Please log in to continue.<br />Note: at the moment this site only supports downloading the last 20 moments.</p>
+		<p>From here you'll be able to download an excel spreadsheet of the data collected from the DH app. Please log in to continue.<br />Note: Downloading the full data will take quite some time ( > 5 minutes).</p>
 		{% if loggedIn %}
-		<p><a class="btn btn-primary btn-large" href="/download/downloadFile">Download &raquo;</a></p>
+		<p>
+			<a class="btn btn-primary btn-large" href="/download/downloadFile?limit=20">Download 20 &raquo;</a>
+			<a class="btn btn-primary btn-large" href="/download/downloadFile?limit=100">Download 100 &raquo;</a>
+			<a class="btn btn-primary btn-large" href="/download/downloadFile?limit=-1">Download Full &raquo;</a>
+		</p>
 		{% else %}
 		<p><a class="btn btn-primary btn-large" href="/login">Log in &raquo;</a></p>
 		{% endif %}

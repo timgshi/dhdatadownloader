@@ -96,36 +96,48 @@ def downloadFile(request):
     response = HttpResponse(mimetype='text/vnd.ms-excel')
     response['Content-Disposition'] = 'attachment; filename=dhdata-%s.xls' % now.strftime('%d-%m-%y')
 
-    wb = xlwt.Workbook()
-    ws = wb.add_sheet('DH Data')
+    if 'session_id' in request.session:
 
-    f = xlwt.Font()
-    f.height = 20*10
-    f.name = 'Arial'
-    f.bold = False
-    f.underline = xlwt.Font().UNDERLINE_SINGLE
-    f.colour_index = 4
+        wb = xlwt.Workbook()
+        ws = wb.add_sheet('DH Data')
 
-    h_style = xlwt.XFStyle()
-    h_style.font = f
+        f = xlwt.Font()
+        f.height = 20*10
+        f.name = 'Arial'
+        f.bold = False
+        f.underline = xlwt.Font().UNDERLINE_SINGLE
+        f.colour_index = 4
+
+        h_style = xlwt.XFStyle()
+        h_style.font = f
+        limit = 1000
+        if request.GET.get('limit') > 0:
+            limit = request.GET.get('limit')
+            pass
+        query = ParsePy.ParseQuery("DHPhoto").limit(limit)
+        query.order("updatedAt", True)
+        objects = query.fetch();
+        headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL']
+        for x in range((len(headers))):
+            ws.write(0,x,headers[x])
+        row = 1
+        for x in objects:
+            try:
+                data = [x.DHDataSixWord, x.DHDataHappinessLevel, x.PFUser._object_id, x.DHDataLocationString, x.geopoint._latitude, x.geopoint._longitude, x._created_at, x.photoData.url]
+                for col in range((len(data))):
+                    if col == len(data) - 1:
+                        ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
+                    else:
+                        ws.write(row, col, data[col])
+                row += 1
+            except AttributeError:
+                print("att error")
+
+        wb.save(response)
+
+        pass
+    else:
+        pass
     
-    query = ParsePy.ParseQuery("DHPhoto")
-    query.order("updatedAt", True).limit(10)
-    objects = query.fetch();
-    headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL']
-    for x in range((len(headers))):
-        ws.write(0,x,headers[x])
-    row = 1
-    for x in objects:
-        data = [x.DHDataSixWord, x.DHDataHappinessLevel, x.PFUser._object_id, x.DHDataLocationString, x.geopoint._latitude, x.geopoint._longitude, x._created_at, x.photoData.url]
-        for col in range((len(data))):
-            if col == len(data) - 1:
-
-                ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
-            else:
-                ws.write(row, col, data[col])
-        row += 1
-
-    wb.save(response)
 
     return response
