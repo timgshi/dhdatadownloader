@@ -7,6 +7,7 @@ import datetime
 from Frameworks import ParsePy
 import xlwt
 from bootstrap.forms import BootstrapForm, Fieldset
+from models import DHPhoto
 
 now = datetime.datetime.now()
 
@@ -97,7 +98,7 @@ def downloadFile(request):
     response['Content-Disposition'] = 'attachment; filename=dhdata-%s.xls' % now.strftime('%d-%m-%y')
 
     if 'session_id' in request.session:
-
+        updateDB()
         wb = xlwt.Workbook()
         ws = wb.add_sheet('DH Data')
 
@@ -110,34 +111,79 @@ def downloadFile(request):
 
         h_style = xlwt.XFStyle()
         h_style.font = f
-        limit = int(request.GET.get('limit'))
-        if limit > 1000 or limit < 0:
-            limit = 20
-        print limit
-        query = ParsePy.ParseQuery("DHPhoto").limit(limit)
-        query.order("updatedAt", True)
-        objects = query.fetch();
-        headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL']
+        # limit = int(request.GET.get('limit'))
+        # if limit > 1000 or limit < 0:
+        #     limit = 20
+        # print limit
+        # query = ParsePy.ParseQuery("DHPhoto").limit(limit)
+        # query.order("updatedAt", True)
+        # objects = query.fetch();
+        # headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL']
+        # for x in range((len(headers))):
+        #     ws.write(0,x,headers[x])
+        # row = 1
+        # for x in objects:
+        #     try:
+        #         data = [x.DHDataSixWord, x.DHDataHappinessLevel, x.PFUser._object_id, x.DHDataLocationString, x.geopoint._latitude, x.geopoint._longitude, x._created_at, x.photoData.url]
+        #         for col in range((len(data))):
+        #             if col == len(data) - 1:
+        #                 ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
+        #             else:
+        #                 ws.write(row, col, data[col])
+        #         row += 1
+        #     except AttributeError:
+        #         print("att error")
+
+        # wb.save(response)
+
+        objects = DHPhoto.objects.order_by('-timestamp')
+        headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL', 'objectID']
         for x in range((len(headers))):
             ws.write(0,x,headers[x])
         row = 1
-        for x in objects:
-            try:
-                data = [x.DHDataSixWord, x.DHDataHappinessLevel, x.PFUser._object_id, x.DHDataLocationString, x.geopoint._latitude, x.geopoint._longitude, x._created_at, x.photoData.url]
-                for col in range((len(data))):
-                    if col == len(data) - 1:
-                        ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
-                    else:
-                        ws.write(row, col, data[col])
-                row += 1
-            except AttributeError:
-                print("att error")
-
+        for photo in objects:
+            data = [photo.description, photo.level, photo.userID, photo.location, photo.latitude, photo.longitude, photo.timestamp.strftime("%Y-%m-%d %H:%M:%S"), photo.photoURL, photo.objectID]
+            for col in range((len(data))):
+                if col == len(data) - 2:
+                    ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
+                else:
+                    ws.write(row, col, data[col])
+            row += 1
         wb.save(response)
-
-        pass
     else:
         pass
     
 
     return response
+
+def updateDB():
+    try:
+        latestPhoto = DHPhoto.objects.latest('timestamp')
+        query = ParsePy.ParseQuery("DHPhoto")
+        combined = '{"__type":"Date","iso":"' + latestPhoto.timestamp.strftime('%Y-%m-%dT%H:%M:%S') + '"}'
+        query.gte('updatedAt', combined)
+        query.order("updatedAt", True)
+        objects = query.fetch()
+        for x in objects:
+            try:
+                try:
+                    existingPhoto = DHPhoto.objects.get(objectID=x.objectId())
+                except DHPhoto.DoesNotExist:
+                    photo = DHPhoto(description=x.DHDataSixWord, level=x.DHDataHappinessLevel, userID=x.PFUser._object_id, location=x.DHDataLocationString, latitude=x.geopoint._latitude, longitude=x.geopoint._longitude, timestamp=x.createdAt(), photoURL=x.photoData.url, objectID=x.objectId())
+                    photo.save()
+            except AttributeError:
+                pass
+            
+    except DHPhoto.DoesNotExist:
+        query = ParsePy.ParseQuery("DHPhoto").limit(1000)
+        query.order("updatedAt", True)
+        objects = query.fetch();
+        for x in objects:
+            try:
+                try:
+                    existingPhoto = DHPhoto.objects.get(objectID=x.objectId())
+                except DHPhoto.DoesNotExist:
+                    photo = DHPhoto(description=x.DHDataSixWord, level=x.DHDataHappinessLevel, userID=x.PFUser._object_id, location=x.DHDataLocationString, latitude=x.geopoint._latitude, longitude=x.geopoint._longitude, timestamp=x.createdAt(), photoURL=x.photoData.url, objectID=x.objectId())
+                    photo.save()
+            except AttributeError:
+                pass
