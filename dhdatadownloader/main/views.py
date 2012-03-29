@@ -137,7 +137,6 @@ def downloadFile(request):
         # wb.save(response)
 
         objects = DHPhoto.objects.order_by('-timestamp')
-        print 'OBJECTS COUNT: %d' % len(objects)
         headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL', 'objectID']
         for x in range((len(headers))):
             ws.write(0,x,headers[x])
@@ -152,8 +151,11 @@ def downloadFile(request):
             row += 1
         wb.save(response)
     else:
-        pass
-    
+        wb = xlwt.Workbook()
+        ws = wb.add_sheet('DH Data')
+        ws.write(0,0,'NOT LOGGED IN')
+        WS.WRITE(1,0, 'TRY LOGGING OUT AND BACK IN')
+        ws.save(response)
 
     return response
 
