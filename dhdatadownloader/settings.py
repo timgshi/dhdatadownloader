@@ -17,7 +17,7 @@ DATABASES = {
         'NAME': 'heroku_app3117140',                      # Or path to database file if using sqlite3.
         'USER': 'heroku_app3117140',                      # Not used with sqlite3.
         'PASSWORD': 'm97shmb1i4neecjms0tr19mjgq',                  # Not used with sqlite3.
-        'HOST': 'ds031627.mongolab.com',                      # Set to empty string for localhost. Not used with sqlite3.
+        'HOST': 'mongodb://ds031627.mongolab.com',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '31627',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
