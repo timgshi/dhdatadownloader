@@ -137,6 +137,7 @@ def downloadFile(request):
         # wb.save(response)
 
         objects = DHPhoto.objects.order_by('-timestamp')
+        print 'OBJECTS COUNT: %d' % len(objects)
         headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL', 'objectID']
         for x in range((len(headers))):
             ws.write(0,x,headers[x])
