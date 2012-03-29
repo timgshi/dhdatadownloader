@@ -13,12 +13,12 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': os.path.join(os.path.dirname(__file__), 'main/db/DHDB.db'),                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django_mongodb_engine', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': 'heroku_app3117140',                      # Or path to database file if using sqlite3.
+        'USER': 'heroku_app3117140',                      # Not used with sqlite3.
+        'PASSWORD': 'm97shmb1i4neecjms0tr19mjgq',                  # Not used with sqlite3.
+        'HOST': 'ds031627.mongolab.com',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '31627',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -133,6 +133,9 @@ INSTALLED_APPS = (
     'bootstrapped',
     'bootstrap',
     'xlwt',
+    'gunicorn',
+    'djangotoolbox',
+    'main',
     # Uncomment the next line to enable the admin:
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
