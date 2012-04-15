@@ -1,13 +1,19 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import Context, loader, RequestContext
 from django.contrib import sessions
+from django.conf import settings
+from django.contrib.auth import authenticate, logout
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django import forms, shortcuts
 import csv
 import datetime
 from Frameworks import ParsePy
 import xlwt
 from bootstrap.forms import BootstrapForm, Fieldset
-from models import DHPhoto
+from models import DHPhoto, DHUserProfile
+from django.db.models import Max
 
 now = datetime.datetime.now()
 
@@ -65,13 +71,34 @@ def login(request):
         username =request.POST['username']
         password = request.POST['password']
 
-        user = ParsePy.ParseUser()
-        user.login(username, password)
+        parseUser = ParsePy.ParseUser()
+        parseUser.login(username, password)
 
-        if user.session_token:
-            print user.session_token
+        if parseUser.session_token:
+            print parseUser.session_token
+            # try:
+            #     user = User.objects.get(username=username)
+            #     print 'USER FOUND'
+            # except User.DoesNotExist:
+            #     print 'BEFORE USER'
+            #     # user = User.objects.create_user(username=username, email=parseUser.email, password=password)
+            #     user = User.objects.create_user('timshi', 'timgshi@gmail.com', 'a071170')
+            #     # print 'USER: ' + user
+            #     print 'BEFORE SAVE'
+            #     user.save()
+            #     print 'after save'
+            #     # dhUserProfile = DHUserProfile()
+            #     # dhUserProfile.user = user
+            #     # dhUserProfile.parseToken = parseUser.session_token
+            #     # dhUserProfile.save()
 
-            request.session['session_id'] = user.session_token
+            # print 'BEFORE AUTHENTICATE'
+            # user = authenticate(username=username, password=password)
+            # print 'AFTER AUTHENTICATE'
+            # print user
+            # auth_login(request, user)
+            # print 'AFTER LOGIN'
+            request.session['session_id'] = parseUser.session_token
             return HttpResponseRedirect('/')
         else:
             login_failed = True
@@ -137,18 +164,34 @@ def downloadFile(request):
         # wb.save(response)
 
         objects = DHPhoto.objects.order_by('-timestamp')
-        headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL', 'objectID']
-        for x in range((len(headers))):
-            ws.write(0,x,headers[x])
+        # headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL', 'objectID']
+        # for x in range((len(headers))):
+        #     ws.write(0,x,headers[x])
+        # row = 1
+        # for photo in objects:
+        #     data = [photo.description, photo.level, photo.userID, photo.location, photo.latitude, photo.longitude, photo.timestamp.strftime("%Y-%m-%d %H:%M:%S"), photo.photoURL, photo.objectID]
+        #     for col in range((len(data))):
+        #         if col == len(data) - 2:
+        #             ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
+        #         else:
+        #             ws.write(row, col, data[col])
+        #     row += 1
+        headers = []
         row = 1
         for photo in objects:
-            data = [photo.description, photo.level, photo.userID, photo.location, photo.latitude, photo.longitude, photo.timestamp.strftime("%Y-%m-%d %H:%M:%S"), photo.photoURL, photo.objectID]
-            for col in range((len(data))):
-                if col == len(data) - 2:
-                    ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
-                else:
-                    ws.write(row, col, data[col])
+            for x in photo.params:
+                if x is not "DHDataWhoTook":
+                    col = 0
+                    try:
+                        col = headers.index(x)
+                    except ValueError:
+                        headers.append(x)
+                        col = headers.index(x)
+                    ws.write(row, col, "%s" % photo.params.get(x))
             row += 1
+        for header in headers:
+            ws.write(0, headers.index(header), header)
+
         wb.save(response)
     else:
         wb = xlwt.Workbook()
@@ -160,33 +203,71 @@ def downloadFile(request):
     return response
 
 def updateDB():
+    print "updateDB"
     try:
         latestPhoto = DHPhoto.objects.latest('timestamp')
-        query = ParsePy.ParseQuery("DHPhoto")
-        combined = '{"__type":"Date","iso":"' + latestPhoto.timestamp.strftime('%Y-%m-%dT%H:%M:%S') + '"}'
-        query.gte('updatedAt', combined)
-        query.order("updatedAt", True)
-        objects = query.fetch()
-        for x in objects:
-            try:
+        # latestPhoto = DHPhoto.objects.order_by('-timestamp')[:1][0]
+        total = 0
+        while True:
+            query = ParsePy.ParseQuery("DHPhoto")
+            combined = '{"__type":"Date","iso":"' + latestPhoto.timestamp.strftime('%Y-%m-%dT%H:%M:%S') + '"}'
+            query.gte('updatedAt', combined)
+            query.order("updatedAt", False)
+            query.limit(100).skip(total)
+            print "Fetching..."
+            objects = query.fetch()
+            print "...done"
+            count = 0
+            for x in objects:
+                print "\n===NEW PHOTO====\n"
+                print x.__dict__
                 try:
-                    existingPhoto = DHPhoto.objects.get(objectID=x.objectId())
-                except DHPhoto.DoesNotExist:
-                    photo = DHPhoto(description=x.DHDataSixWord, level=x.DHDataHappinessLevel, userID=x.PFUser._object_id, location=x.DHDataLocationString, latitude=x.geopoint._latitude, longitude=x.geopoint._longitude, timestamp=x.createdAt(), photoURL=x.photoData.url, objectID=x.objectId())
-                    photo.save()
-            except AttributeError:
-                pass
+                    try:
+                       
+                        existingPhoto = DHPhoto.objects.get(objectID=x.objectId())
+                      
+                        existingPhoto.params = x.__dict__
+                        # existingPhoto.save()
+                    except DHPhoto.DoesNotExist:
+                        print "before create"
+                        photo = DHPhoto(description=x.DHDataSixWord, level=x.DHDataHappinessLevel, userID=x.PFUser._object_id, location=x.DHDataLocationString, latitude=x.geopoint._latitude, longitude=x.geopoint._longitude, timestamp=x.createdAt(), photoURL=x.photoData.url, objectID=x.objectId(), params=x.__dict__)
+                        print "before save"
+                        print photo
+                        photo.save()
+                except AttributeError:
+                    print "ATT ERROR"
+                    pass
+                count += 1
+                print count
+            total += count
+            print total
+            if count == 0:
+                break
             
-    except DHPhoto.DoesNotExist:
-        query = ParsePy.ParseQuery("DHPhoto").limit(1000)
-        query.order("updatedAt", True)
-        objects = query.fetch();
-        for x in objects:
-            try:
+    except (DHPhoto.DoesNotExist):
+        print "does not exist"
+        total = 0
+        while True:
+            print "new loop"
+            query = ParsePy.ParseQuery("DHPhoto").limit(100).skip(total)
+            query.order("updatedAt", True)
+            print "Fetching......."
+            objects = query.fetch();
+            print "....done"
+            count = 0
+            for x in objects:
                 try:
-                    existingPhoto = DHPhoto.objects.get(objectID=x.objectId())
-                except DHPhoto.DoesNotExist:
-                    photo = DHPhoto(description=x.DHDataSixWord, level=x.DHDataHappinessLevel, userID=x.PFUser._object_id, location=x.DHDataLocationString, latitude=x.geopoint._latitude, longitude=x.geopoint._longitude, timestamp=x.createdAt(), photoURL=x.photoData.url, objectID=x.objectId())
-                    photo.save()
-            except AttributeError:
-                pass
+                    try:
+                        existingPhoto = DHPhoto.objects.get(objectID=x.objectId())
+                    except DHPhoto.DoesNotExist:
+                        photo = DHPhoto(description=x.DHDataSixWord, level=x.DHDataHappinessLevel, userID=x.PFUser._object_id, location=x.DHDataLocationString, latitude=x.geopoint._latitude, longitude=x.geopoint._longitude, timestamp=x.createdAt(), photoURL=x.photoData.url, objectID=x.objectId(), params=x.__dict__)
+                        photo.save()
+                except AttributeError:
+                    pass
+                count += 1
+                print count
+            total += count
+            print total
+            if count == 0:
+                break
+

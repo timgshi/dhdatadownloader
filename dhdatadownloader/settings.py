@@ -165,4 +165,6 @@ LOGGING = {
     }
 }
 
+AUTH_PROFILE_MODULE = 'main.UserProfile'
+LOGIN_URL = '/login/'
 
