@@ -180,7 +180,7 @@ def downloadFile(request):
         row = 1
         for photo in objects:
             for x in photo.params:
-                if x is not "DHDataWhoTook":
+                if x not in 'DHDataWhoTook':
                     col = 0
                     try:
                         col = headers.index(x)
