@@ -99,6 +99,7 @@ def login(request):
             # auth_login(request, user)
             # print 'AFTER LOGIN'
             request.session['session_id'] = parseUser.session_token
+            request.session['user_id'] = parseUser._object_id
             return HttpResponseRedirect('/')
         else:
             login_failed = True
@@ -162,8 +163,12 @@ def downloadFile(request):
         #         print("att error")
 
         # wb.save(response)
-
-        objects = DHPhoto.objects.order_by('-timestamp')
+        objects = []
+        personal = request.GET.get('personal')
+        if personal == 'true':
+            objects = DHPhoto.objects.filter(userID__iexact=request.session['user_id']).order_by('-timestamp')
+        else:
+            objects = DHPhoto.objects.order_by('-timestamp')
         # headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL', 'objectID']
         # for x in range((len(headers))):
         #     ws.write(0,x,headers[x])
