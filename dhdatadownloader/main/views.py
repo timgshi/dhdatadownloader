@@ -180,7 +180,7 @@ def downloadFile(request):
         row = 1
         for photo in objects:
             for x in photo.params:
-                if x not in 'DHDataWhoTook':
+                if x not in 'DHDataWhoTook' and x not in 'ACL':
                     col = 0
                     try:
                         col = headers.index(x)
@@ -225,9 +225,10 @@ def updateDB():
                     try:
                        
                         existingPhoto = DHPhoto.objects.get(objectID=x.objectId())
-                      
-                        existingPhoto.params = x.__dict__
-                        # existingPhoto.save()
+                        existingPhoto.delete()
+                        photo = DHPhoto(description=x.DHDataSixWord, level=x.DHDataHappinessLevel, userID=x.PFUser._object_id, location=x.DHDataLocationString, latitude=x.geopoint._latitude, longitude=x.geopoint._longitude, timestamp=x.createdAt(), photoURL=x.photoData.url, objectID=x.objectId(), params=x.__dict__)
+                        photo.save()
+                        print 'photo updated'
                     except DHPhoto.DoesNotExist:
                         print "before create"
                         photo = DHPhoto(description=x.DHDataSixWord, level=x.DHDataHappinessLevel, userID=x.PFUser._object_id, location=x.DHDataLocationString, latitude=x.geopoint._latitude, longitude=x.geopoint._longitude, timestamp=x.createdAt(), photoURL=x.photoData.url, objectID=x.objectId(), params=x.__dict__)
