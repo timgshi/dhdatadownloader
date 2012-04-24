@@ -1,23 +1,41 @@
 {% extends "templates/base.html" %}
 
 {% block fbinit %}
-<!-- FB.Event.subscribe('auth.login', function(response) {
-	alert('logged in');
-		var myForm = document.createElement("form");
-		myForm.method="post" ;
-		myForm.action = "/" ;
-		p = {user:'peter',cc:'aus'};
-		for (var k in p) {
-			var myInput = document.createElement("input") ;
-			myInput.setAttribute("name", k) ;
-			myInput.setAttribute("value", p[k]);
-			myForm.appendChild(myInput) ;
-		}
-		document.body.appendChild(myForm) ;
-		myForm.submit() ;
-		document.body.removeChild(myForm) ;
+FB.Event.subscribe('auth.statusChange', function(response) {
+	//alert('logged in');
+	if (response.authResponse) {
+		
+	}
+	FB.getLoginStatus(function(response) {
+		var accessToken = FB.getAuthResponse()['accessToken'];
+		var expiresIn = FB.getAuthResponse()['expiresIn'];
+		var userID = FB.getAuthResponse()['userID'];
+		var postdata={
+          'csrfmiddlewaretoken': '{{ csrf_token }}',
+          'accessToken' : accessToken,
+          'userID' : userID,
+          'expiresIn': expiresIn
+          //'accessToken': FB.getAuthResponse()['accessToken'].val(),
+          //'expiresIn': FB.getAuthResponse()['expiresIn'].val(),
+          //'userID': FB.getAuthReponse()['userID'].val()
+     	}
+		$.post('facebookLogin/', postdata, function(data) {
+			
+			window.location.replace('/');
+			
+  			//alert('hi');
+  			//$('.result').html(data);
+		});
+	});
+	
+		//alert('logged in');
+		alert(FB.getAuthResponse()['accessToken']+FB.getAuthResponse()['expiresIn']+FB.getAuthResponse()['userID']);
+		alert(FB.getAuthResponse()['expiresIn']);
+		alert(FB.getAuthResponse()['userID']);
 
-}); -->
+		
+	
+});
 {% endblock %}
 
 {% block content %}
@@ -43,7 +61,7 @@
 						<button type="submit" class="btn btn-primary">Login</button>
 					</div>
 				</form>
-				<!-- <div class="fb-login-button"></div> -->
+				<div class="fb-login-button" data-show-faces="true" data-width="200" data-max-rows="1"></div>
 			</div>
 		</div>
 	</div>

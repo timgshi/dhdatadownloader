@@ -17,15 +17,16 @@ from picklefield.fields import PickledObjectField
 
 
 class DHPhoto(models.Model):
-	description = models.CharField(max_length=200)
-	level = models.IntegerField()
-	userID = models.CharField(max_length=200)
-	location = models.CharField(max_length=200)
-	latitude = models.FloatField()
-	longitude = models.FloatField()
-	timestamp = models.DateTimeField()
-	photoURL = models.CharField(max_length=200)
+	description = models.CharField(max_length=200, blank=True, null=True)
+	level = models.IntegerField(blank=True, null=True)
+	userID = models.CharField(max_length=200, blank=True, null=True)
+	location = models.CharField(max_length=200, blank=True, null=True)
+	latitude = models.FloatField(blank=True, null=True)
+	longitude = models.FloatField(blank=True, null=True)
+	timestamp = models.DateTimeField(blank=True, null=True)
+	photoURL = models.CharField(max_length=200, blank=True, null=True)
 	objectID = models.CharField(max_length=200)
+	createdAt = models.DateTimeField(blank=True, null=True)
 	params = PickledObjectField()
 
 	def __unicode__(self):

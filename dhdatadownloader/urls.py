@@ -10,6 +10,8 @@ urlpatterns = patterns('',
 	url(r'^download/downloadFile/$', 'dhdatadownloader.main.views.downloadFile'),
     url(r'^login/$', 'dhdatadownloader.main.views.login'),
     url(r'^logout/$', 'dhdatadownloader.main.views.logout'),
+    url(r'^channel$', 'dhdatadownloader.main.views.channel'),
+    url(r'^login/facebookLogin/$', 'dhdatadownloader.main.views.facebookLogin'),
     # Examples:
     # url(r'^$', 'dhdatadownloader.views.home', name='home'),
     # url(r'^dhdatadownloader/', include('dhdatadownloader.foo.urls')),

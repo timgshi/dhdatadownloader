@@ -34,7 +34,8 @@ class LoginForm(BootstrapForm):
 ParsePy.APPLICATION_ID = "53Rdo20D9PA1hiPTN7qPzcPVaNQEmAkMXi3j6tLv"
 ParsePy.MASTER_KEY = "FqhBINgpfI1ISF1ao2poRHYzvhbbr6PjJvuij0cq"
 
-
+def channel(request):
+    return HttpResponse('<script src="//connect.facebook.net/en_US/all.js"></script>')
 
 def index(request):
     loggedIn = False
@@ -112,6 +113,33 @@ def login(request):
         'login_failed' : login_failed
     })
     return HttpResponse(t.render(c))
+
+def facebookLogin(request):
+    print 'fblogin'
+    try:
+        print 'before'
+        userID = request.POST['userID']
+        print 'user'
+        accessToken = request.POST['accessToken']
+        print 'access'
+        expiresIn = request.POST['expiresIn']
+        print 'expire'
+        print userID
+        print accessToken
+        print expiresIn
+        print 'before login'
+        parseUser = ParsePy.ParseUser()
+        parseUser.facebookLogin(userID, accessToken, expiresIn)
+        print 'after login'
+        if parseUser.session_token:
+            print parseUser.session_token
+            request.session['session_id'] = parseUser.session_token
+            request.session['user_id'] = parseUser._object_id
+            return HttpResponseRedirect('/')
+
+    except KeyError:
+        print 'fb key error'
+    
 
 def logout(request):
     try:
@@ -206,6 +234,36 @@ def downloadFile(request):
         ws.save(response)
 
     return response
+
+def resetDB():
+    print 'reset db start'
+    total = 0
+    while True:
+        print '===NEW LOOP==='
+        query = ParsePy.ParseQuery("DHPhoto").limit(100).skip(total)
+        query.order("createdAt", False)
+        print "Fetching......."
+        objects = query.fetch();
+        print "....done"
+        count = 0
+        for x in objects:
+            print x.createdAt()
+            try:
+                existingPhoto = DHPhoto.objects.get(objectID=x.objectId())
+                existingPhoto.params = x.__dict__
+                existingPhoto.createdAt = x.createdAt()
+                existingPhoto.save()
+                print 'updated existing'
+            except DHPhoto.DoesNotExist:
+                photo = DHPhoto(objectID=x.objectId(), createdAt=x.createdAt(), params=x.__dict__)
+                photo.save()
+                print 'new created'
+            count += 1
+            print total + count
+        total += count
+        print total
+        if count == 0:
+            break
 
 def updateDB():
     print "updateDB"
