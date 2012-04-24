@@ -19,19 +19,19 @@ FB.Event.subscribe('auth.statusChange', function(response) {
           //'expiresIn': FB.getAuthResponse()['expiresIn'].val(),
           //'userID': FB.getAuthReponse()['userID'].val()
      	}
-		$.post('facebookLogin/', postdata, function(data) {
+		//$.post('facebookLogin/', postdata, function(data) {
 			
-			window.location.replace('/');
+			//window.location.replace('/');
 			
   			//alert('hi');
   			//$('.result').html(data);
-		});
+		//});
 	});
 	
 		//alert('logged in');
-		alert(FB.getAuthResponse()['accessToken']+FB.getAuthResponse()['expiresIn']+FB.getAuthResponse()['userID']);
-		alert(FB.getAuthResponse()['expiresIn']);
-		alert(FB.getAuthResponse()['userID']);
+		//alert(FB.getAuthResponse()['accessToken']+FB.getAuthResponse()['expiresIn']+FB.getAuthResponse()['userID']);
+		//alert(FB.getAuthResponse()['expiresIn']);
+		//alert(FB.getAuthResponse()['userID']);
 
 		
 	
