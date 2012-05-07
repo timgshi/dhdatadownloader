@@ -194,9 +194,9 @@ def downloadFile(request):
         objects = []
         personal = request.GET.get('personal')
         if personal == 'true':
-            objects = DHPhoto.objects.filter(userID__iexact=request.session['user_id']).order_by('-timestamp')
+            objects = DHPhoto.objects.filter(userID__iexact=request.session['user_id']).order_by('-createdAt')
         else:
-            objects = DHPhoto.objects.order_by('-timestamp')
+            objects = DHPhoto.objects.order_by('-createdAt')
         # headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL', 'objectID']
         # for x in range((len(headers))):
         #     ws.write(0,x,headers[x])
@@ -209,21 +209,46 @@ def downloadFile(request):
         #         else:
         #             ws.write(row, col, data[col])
         #     row += 1
-        headers = []
-        row = 1
+        # csvArray = []
+        # headers = []
+        # row = 1
+        # for photo in objects:
+        #     photoArray = []
+        #     for x in photo.params:
+                
+        #         if x not in 'DHDataWhoTook' and x not in 'ACL':
+        #             col = 0
+        #             try:
+        #                 col = headers.index(x)
+        #             except ValueError:
+        #                 headers.append(x)
+        #                 col = headers.index(x)
+        #             cellValue = "%s" % photo.params.get(x)
+        #             cellValue = cellValue.encode('ascii', 'ignore')
+        #             photoArray.insert(col, cellValue)
+        #             print photoArray
+        #             # ws.write(row, col, "%s" % photo.params.get(x))
+        #     csvArray.insert(row, photoArray)
+        #     row += 1
+        # for header in headers:
+            # ws.write(0, headers.index(header), header)
+        csvArray = []
+        headers = ['DHDataGeoLat', 'DHDataGeoLong', 'DHDataHappinessLevel', 'DHDataLocationString', 'DHDataSixWord', 'DHDataTimestamp', 'DHDataWeatherCondition', 'DHDataWeatherTemperature', 'photoData', '_created_at', '_updated_at', '_object_id']
+        csvArray.append(headers)
         for photo in objects:
-            for x in photo.params:
-                if x not in 'DHDataWhoTook' and x not in 'ACL':
-                    col = 0
-                    try:
-                        col = headers.index(x)
-                    except ValueError:
-                        headers.append(x)
-                        col = headers.index(x)
-                    ws.write(row, col, "%s" % photo.params.get(x))
-            row += 1
-        for header in headers:
-            ws.write(0, headers.index(header), header)
+            photoArray = []
+            for x in headers:
+                cellValue = "%s" % photo.params.get(x)
+                cellValue = cellValue.encode('ascii', 'ignore')
+                photoArray.append(cellValue)
+            csvArray.append(photoArray)
+        response = HttpResponse(mimetype='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=dhdata-%s.csv' % now.strftime('%d-%m-%y')
+        # csvArray.insert(0, headers)
+
+        writer = csv.writer(response)
+        for row in csvArray:
+            writer.writerow(row)
 
         wb.save(response)
     else:
