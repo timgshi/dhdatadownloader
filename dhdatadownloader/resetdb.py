@@ -1,5 +1,6 @@
 from django.core.management import setup_environ
 import settings
+import os.path
 setup_environ(settings)
 
 from Frameworks import ParsePy
@@ -52,7 +53,8 @@ def writeFile():
 	wb = Workbook()
 
 	# dest_filename = r'dhdata-%s.xlsx' % now.strftime('%d-%m-%y')
-	dest_filename = r'dhdata-latest.xlsx'
+	dest_filename = os.path.join(os.path.dirname(__file__), 'main/dhdata-latest.xlsx')
+	# dest_filename = r'dhdata-latest.xlsx'
 	ws = wb.worksheets[0]
 
 	ws.title = "dh data"

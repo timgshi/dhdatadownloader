@@ -14,6 +14,9 @@ import xlwt
 from bootstrap.forms import BootstrapForm, Fieldset
 from models import DHPhoto, DHUserProfile
 from django.db.models import Max
+from django.core.servers.basehttp import FileWrapper
+from django.core.files import File
+import os.path
 
 now = datetime.datetime.now()
 
@@ -154,103 +157,108 @@ def downloadFile(request):
     response['Content-Disposition'] = 'attachment; filename=dhdata-%s.xls' % now.strftime('%d-%m-%y')
 
     if 'session_id' in request.session:
-        updateDB()
-        wb = xlwt.Workbook()
-        ws = wb.add_sheet('DH Data')
+        f = open(os.path.join(os.path.dirname(__file__), 'dhdata-latest.xlsx'), 'r')
+        # myfile = File(f)
+        response = HttpResponse((f), content_type='text/vnd.ms-excel')
+        response['Content-Disposition'] = 'attachment; filename=dhdata-%s.xlsx' % now.strftime('%d-%m-%y')
+        f.close
+        # updateDB()
+        # wb = xlwt.Workbook()
+        # ws = wb.add_sheet('DH Data')
 
-        f = xlwt.Font()
-        f.height = 20*10
-        f.name = 'Arial'
-        f.bold = False
-        f.underline = xlwt.Font().UNDERLINE_SINGLE
-        f.colour_index = 4
+        # f = xlwt.Font()
+        # f.height = 20*10
+        # f.name = 'Arial'
+        # f.bold = False
+        # f.underline = xlwt.Font().UNDERLINE_SINGLE
+        # f.colour_index = 4
 
-        h_style = xlwt.XFStyle()
-        h_style.font = f
-        # limit = int(request.GET.get('limit'))
-        # if limit > 1000 or limit < 0:
-        #     limit = 20
-        # print limit
-        # query = ParsePy.ParseQuery("DHPhoto").limit(limit)
-        # query.order("updatedAt", True)
-        # objects = query.fetch();
-        # headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL']
-        # for x in range((len(headers))):
-        #     ws.write(0,x,headers[x])
-        # row = 1
-        # for x in objects:
-        #     try:
-        #         data = [x.DHDataSixWord, x.DHDataHappinessLevel, x.PFUser._object_id, x.DHDataLocationString, x.geopoint._latitude, x.geopoint._longitude, x._created_at, x.photoData.url]
-        #         for col in range((len(data))):
-        #             if col == len(data) - 1:
-        #                 ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
-        #             else:
-        #                 ws.write(row, col, data[col])
-        #         row += 1
-        #     except AttributeError:
-        #         print("att error")
+        # h_style = xlwt.XFStyle()
+        # h_style.font = f
+        # # limit = int(request.GET.get('limit'))
+        # # if limit > 1000 or limit < 0:
+        # #     limit = 20
+        # # print limit
+        # # query = ParsePy.ParseQuery("DHPhoto").limit(limit)
+        # # query.order("updatedAt", True)
+        # # objects = query.fetch();
+        # # headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL']
+        # # for x in range((len(headers))):
+        # #     ws.write(0,x,headers[x])
+        # # row = 1
+        # # for x in objects:
+        # #     try:
+        # #         data = [x.DHDataSixWord, x.DHDataHappinessLevel, x.PFUser._object_id, x.DHDataLocationString, x.geopoint._latitude, x.geopoint._longitude, x._created_at, x.photoData.url]
+        # #         for col in range((len(data))):
+        # #             if col == len(data) - 1:
+        # #                 ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
+        # #             else:
+        # #                 ws.write(row, col, data[col])
+        # #         row += 1
+        # #     except AttributeError:
+        # #         print("att error")
 
-        # wb.save(response)
-        objects = []
-        personal = request.GET.get('personal')
-        if personal == 'true':
-            objects = DHPhoto.objects.filter(userID__iexact=request.session['user_id']).order_by('-createdAt')
-        else:
-            objects = DHPhoto.objects.order_by('-createdAt')
-        # headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL', 'objectID']
-        # for x in range((len(headers))):
-        #     ws.write(0,x,headers[x])
-        # row = 1
-        # for photo in objects:
-        #     data = [photo.description, photo.level, photo.userID, photo.location, photo.latitude, photo.longitude, photo.timestamp.strftime("%Y-%m-%d %H:%M:%S"), photo.photoURL, photo.objectID]
-        #     for col in range((len(data))):
-        #         if col == len(data) - 2:
-        #             ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
-        #         else:
-        #             ws.write(row, col, data[col])
-        #     row += 1
+        # # wb.save(response)
+        # objects = []
+        # personal = request.GET.get('personal')
+        # if personal == 'true':
+        #     objects = DHPhoto.objects.filter(userID__iexact=request.session['user_id']).order_by('-createdAt')
+        # else:
+        #     objects = DHPhoto.objects.order_by('-createdAt')
+        # # headers = ['description', 'level', 'userID', 'location', 'latitude', 'longitude', 'date', 'photoURL', 'objectID']
+        # # for x in range((len(headers))):
+        # #     ws.write(0,x,headers[x])
+        # # row = 1
+        # # for photo in objects:
+        # #     data = [photo.description, photo.level, photo.userID, photo.location, photo.latitude, photo.longitude, photo.timestamp.strftime("%Y-%m-%d %H:%M:%S"), photo.photoURL, photo.objectID]
+        # #     for col in range((len(data))):
+        # #         if col == len(data) - 2:
+        # #             ws.write(row, col, xlwt.Formula("HYPERLINK" + '("%s";"photo")' % data[col]), h_style)
+        # #         else:
+        # #             ws.write(row, col, data[col])
+        # #     row += 1
+        # # csvArray = []
+        # # headers = []
+        # # row = 1
+        # # for photo in objects:
+        # #     photoArray = []
+        # #     for x in photo.params:
+                
+        # #         if x not in 'DHDataWhoTook' and x not in 'ACL':
+        # #             col = 0
+        # #             try:
+        # #                 col = headers.index(x)
+        # #             except ValueError:
+        # #                 headers.append(x)
+        # #                 col = headers.index(x)
+        # #             cellValue = "%s" % photo.params.get(x)
+        # #             cellValue = cellValue.encode('ascii', 'ignore')
+        # #             photoArray.insert(col, cellValue)
+        # #             print photoArray
+        # #             # ws.write(row, col, "%s" % photo.params.get(x))
+        # #     csvArray.insert(row, photoArray)
+        # #     row += 1
+        # # for header in headers:
+        #     # ws.write(0, headers.index(header), header)
         # csvArray = []
-        # headers = []
-        # row = 1
+        # headers = ['DHDataGeoLat', 'DHDataGeoLong', 'DHDataHappinessLevel', 'DHDataLocationString', 'DHDataSixWord', 'DHDataTimestamp', 'DHDataWeatherCondition', 'DHDataWeatherTemperature', 'photoData', '_created_at', '_updated_at', '_object_id']
+        # csvArray.append(headers)
         # for photo in objects:
         #     photoArray = []
-        #     for x in photo.params:
-                
-        #         if x not in 'DHDataWhoTook' and x not in 'ACL':
-        #             col = 0
-        #             try:
-        #                 col = headers.index(x)
-        #             except ValueError:
-        #                 headers.append(x)
-        #                 col = headers.index(x)
-        #             cellValue = "%s" % photo.params.get(x)
-        #             cellValue = cellValue.encode('ascii', 'ignore')
-        #             photoArray.insert(col, cellValue)
-        #             print photoArray
-        #             # ws.write(row, col, "%s" % photo.params.get(x))
-        #     csvArray.insert(row, photoArray)
-        #     row += 1
-        # for header in headers:
-            # ws.write(0, headers.index(header), header)
-        csvArray = []
-        headers = ['DHDataGeoLat', 'DHDataGeoLong', 'DHDataHappinessLevel', 'DHDataLocationString', 'DHDataSixWord', 'DHDataTimestamp', 'DHDataWeatherCondition', 'DHDataWeatherTemperature', 'photoData', '_created_at', '_updated_at', '_object_id']
-        csvArray.append(headers)
-        for photo in objects:
-            photoArray = []
-            for x in headers:
-                cellValue = "%s" % photo.params.get(x)
-                cellValue = cellValue.encode('ascii', 'ignore')
-                photoArray.append(cellValue)
-            csvArray.append(photoArray)
-        response = HttpResponse(mimetype='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=dhdata-%s.csv' % now.strftime('%d-%m-%y')
-        # csvArray.insert(0, headers)
+        #     for x in headers:
+        #         cellValue = "%s" % photo.params.get(x)
+        #         cellValue = cellValue.encode('ascii', 'ignore')
+        #         photoArray.append(cellValue)
+        #     csvArray.append(photoArray)
+        # response = HttpResponse(mimetype='text/csv')
+        # response['Content-Disposition'] = 'attachment; filename=dhdata-%s.csv' % now.strftime('%d-%m-%y')
+        # # csvArray.insert(0, headers)
 
-        writer = csv.writer(response)
-        for row in csvArray:
-            writer.writerow(row)
+        # writer = csv.writer(response)
+        # for row in csvArray:
+        #     writer.writerow(row)
 
-        wb.save(response)
+        # wb.save(response)
     else:
         wb = xlwt.Workbook()
         ws = wb.add_sheet('DH Data')
