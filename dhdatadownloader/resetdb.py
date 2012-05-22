@@ -40,6 +40,7 @@ def resetDB():
         print total
         if count == 0:
             break
+    return total
 
 from openpyxl.workbook import Workbook
 from openpyxl.writer.excel import ExcelWriter
@@ -52,18 +53,10 @@ def writeFile():
 
 	wb = Workbook()
 
-	# dest_filename = r'dhdata-%s.xlsx' % now.strftime('%d-%m-%y')
 	dest_filename = os.path.join(os.path.dirname(__file__), 'main/dhdata-latest.xlsx')
-	# dest_filename = r'dhdata-latest.xlsx'
 	ws = wb.worksheets[0]
 
 	ws.title = "dh data"
-
-	# for col_idx in xrange(1, 40):
-	#     col = get_column_letter(col_idx)
-	#     for row in xrange(1, 600):
-	#         ws.cell('%s%s'%(col, row)).value = '%s%s' % (col, row)
-
 	objects = DHPhoto.objects.order_by('-createdAt')
 	headers = []
 	row = 2
@@ -81,12 +74,8 @@ def writeFile():
 	            col += 1
 	            cellValue = "%s" % photo.params.get(x)
 	            cellValue = cellValue.encode('ascii', 'ignore')
-	            # photoArray.insert(col, cellValue)
-	            # print photoArray
 	            colLetter = get_column_letter(col)
 	            ws.cell('%s%s'%(colLetter,row)).value = cellValue
-	            # ws.write(row, col, "%s" % photo.params.get(x))
-	    # csvArray.insert(row, photoArray)
 	    row += 1
 	print headers
 	col = 1
@@ -133,6 +122,9 @@ def getSmiles():
 	                break
 	        except urllib2.URLError:
 	            print "URL ERROR"
+    return total
 
-# resetDB()
+totalSmiles = getSmiles()
+totalReset = resetDB()
 writeFile()
+print 'Total Smiles Updates: %d, Total Moments Reset: %d, Date Written: %s' % (totalSmiles, totalReset, datetime.datetime.now())
